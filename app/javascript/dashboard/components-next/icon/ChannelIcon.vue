@@ -1,6 +1,6 @@
 <script setup>
-import { toRef } from 'vue';
-import { useChannelIcon } from './provider';
+import { toRef, computed } from 'vue';
+import { useChannelIcon, useChannelImage } from './provider';
 import Icon from 'next/icon/Icon.vue';
 
 const props = defineProps({
@@ -8,11 +8,27 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  // When true, render the brand image (when available for the channel type)
+  // and fall back to the monochrome icon otherwise.
+  useImage: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const channelIcon = useChannelIcon(toRef(props, 'inbox'));
+const inboxRef = toRef(props, 'inbox');
+const channelIcon = useChannelIcon(inboxRef);
+const channelImage = useChannelImage(inboxRef);
+
+const showImage = computed(() => props.useImage && channelImage.value);
 </script>
 
 <template>
-  <Icon :icon="channelIcon" />
+  <img
+    v-if="showImage"
+    :src="channelImage"
+    :alt="inbox.name || ''"
+    class="object-contain"
+  />
+  <Icon v-else :icon="channelIcon" />
 </template>
